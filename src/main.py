@@ -87,7 +87,7 @@ def main():
     logger.info("\n\n\n******** Run started ********")
     logger.info('%10s : %s' % ('Running on', os.uname()[1]))
     logger.info("Command line: " + sys.executable + " " + " ".join(sys.argv))
-    python_utils.findGPUtoUse()
+    #python_utils.findGPUtoUse()
 
     # Retrieve all the volume pathways from the csv and other attributes
     logger.info("\n\n\n******** Dataset preparation ********")

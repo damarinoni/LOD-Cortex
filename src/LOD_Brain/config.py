@@ -83,7 +83,7 @@ class AugmentConfig(BaseModel):
     prob_overall: float = Field(0.9, title="overall probability to apply data augmentation (training ONLY)")
 
     prob_flip: float = Field(0.5, title="probability to apply 'VerticalFlip'")
-    prob_inho: float = Field(1.0, title="probability to apply 'InhomogeneityNoiseAugment'")
+    prob_inho: float = Field(0.0, title="probability to apply 'InhomogeneityNoiseAugment'")
 
     prob_geom: float = Field(1.0, title="probability to apply a geometric transformation (one of the following)")
     prob_grid: float = Field(1.0, title="probability to apply 'GridDistortion'")
@@ -108,9 +108,9 @@ class AugmentConfig(BaseModel):
 
 
 class DataConfig(BaseModel):
-    Path_in_data: str = Field('/LOD_Brain/data/', title="root folder")
-    Path_in_csv: str = Field('/LOD_Brain/data/analysis/csv/', title="csv path")
-    Filename_csv: str = Field('dataset_short_training_a+a.csv', title="csv filename")
+    Path_in_data: str = Field('/home/astroboy/Documents/LOD/Dataset/', title="root folder")
+    Path_in_csv: str = Field('/home/astroboy/Documents/LOD/Dataset/', title="csv path")
+    Filename_csv: str = Field('aomic.csv', title="csv filename")
     Inh_vol_path: str = Field('/LOD_Brain/data/analysis/inhomogeneity_volume/inhomogeneity.npy', title="inhomogeneity path")
     normalisation: str = Field('z_score_volume', title="Normalisation procedure, can be: [z_score_volume, z_score_site, rescaling, rescaling_a_b]")
     

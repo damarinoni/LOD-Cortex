@@ -16,8 +16,8 @@ from LOD_Brain.model.utils import freeze_level_lte, load_last_weights, set_train
 from LOD_Brain.config import Config
 from tensorflow.keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard, EarlyStopping
 import tensorflow as tf
-from wandb.keras import WandbCallback
-import wandb
+###from wandb.keras import WandbCallback
+###import wandb
 from loguru import logger
 from LOD_Brain.python_utils import format_prediction_into_gif
 
@@ -255,15 +255,15 @@ def train_model(config: Config, model, ds_train, ds_val, class_weights):
     model.summary(print_fn=lambda x: logger.info(x), line_length=120)           # log the summary of the model
     STEPS_PER_EPOCH = config.training.train_size // config.training.batch_size
     # Callbacks
-    wandb_callback = WandbCallback(monitor='val_loss',
-                                   verbose=0,
-                                   mode='auto',
-                                   save_weights_only=True,
-                                   log_weights=True,
-                                   log_gradients=False,
-                                   save_model=False,
-                                   log_batch_frequency=int(config.training.validation_freq * STEPS_PER_EPOCH)
-                                  )
+    # wandb_callback = WandbCallback(monitor='val_loss',
+    #                                verbose=0,
+    #                                mode='auto',
+    #                                save_weights_only=True,
+    #                                log_weights=True,
+    #                                log_gradients=False,
+    #                                save_model=False,
+    #                                log_batch_frequency=int(config.training.validation_freq * STEPS_PER_EPOCH)
+    #                               )
     # TODO: Add a callback to log the result volume of a segmentation test (on wandb via a LambdaCallback)
     tb_callback = TensorBoard(log_dir=(config.training.exp_path.parent / 'logs').as_posix(),
                               histogram_freq=0,
@@ -277,32 +277,33 @@ def train_model(config: Config, model, ds_train, ds_val, class_weights):
                                    verbose=1
                                    )
 
-    def log_wandb_mask(epoch, logs):
-        if not epoch % config.training.validation_freq: 
-            # Use the model to predict the values from the validation dataset.
-            vol = next(ds_val.as_numpy_iterator())
-            segm = model.predict(vol[0])
+    # def log_wandb_mask(epoch, logs):
+    #     if not epoch % config.training.validation_freq: 
+    #         # Use the model to predict the values from the validation dataset.
+    #         vol = next(ds_val.as_numpy_iterator())
+    #         segm = model.predict(vol[0])
 
-            out = format_prediction_into_gif(vol[0], segm)
-            gt = format_prediction_into_gif(vol[0], vol[1])
+    #         out = format_prediction_into_gif(vol[0], segm)
+    #         gt = format_prediction_into_gif(vol[0], vol[1])
         
-            # log all composite images to W&B
-            wandb.log({"predictions": wandb.Video(out, fps=4, format="gif")})
-            wandb.log({"gt": wandb.Video(gt, fps=4, format="gif")})
+    #         # log all composite images to W&B
+    #         wandb.log({"predictions": wandb.Video(out, fps=4, format="gif")})
+    #         wandb.log({"gt": wandb.Video(gt, fps=4, format="gif")})
 
-    im_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_wandb_mask)
+    ###im_callback = tf.keras.callbacks.LambdaCallback(on_epoch_end=log_wandb_mask)
 
     earlystopper = EarlyStopping(monitor='val_loss', patience=10, verbose=1, restore_best_weights=True)
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.25, patience=5, min_lr=1e-7, verbose=1)
 
     # Training loop
-    model.fit_generator(ds_train,
+    model.fit(ds_train,
               steps_per_epoch=config.training.train_size // config.training.batch_size,
               epochs=config.training.epochs,
               validation_data=ds_val,
               validation_steps=config.training.validation_steps,
               validation_freq=config.training.validation_freq,
-              callbacks=[tb_callback, wandb_callback, reduce_lr, earlystopper, checkpointer, im_callback],
+              callbacks=[tb_callback, reduce_lr, earlystopper, checkpointer],
+              ###callbacks=[tb_callback, wandb_callback, reduce_lr, earlystopper, checkpointer, im_callback],
               # class_weight = class_weights,
               verbose=2,
               )

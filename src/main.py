@@ -16,7 +16,7 @@ from LOD_Brain.testing import test_model
 from LOD_Brain.config import Config, show_help, validate_config_arg
 from LOD_Brain import python_utils
 from LOD_Brain.data import dataset_manager
-from loguru import logger
+###from loguru import logger
 import numpy as np
 from pathlib import Path
 from datetime import datetime
@@ -24,7 +24,7 @@ import yaml
 import os
 from os.path import join as opj
 import sys
-import wandb
+###import wandb
 
 
 _args_system = {}
@@ -41,7 +41,7 @@ def _process_system_args():
                 current_arg = arg.split('=')
                 _get_type = current_arg[0].replace('-', '')
                 if not validate_config_arg(_get_type):
-                    logger.warning(f'The argument "{_get_type}" is not present in the configuration. Is there a typo?')
+                    ###logger.warning(f'The argument "{_get_type}" is not present in the configuration. Is there a typo?')
                     sys.exit()
 
                 get_type = _get_type.split('.')
@@ -62,35 +62,36 @@ def _process_system_args():
 
 def main():
     # Initialize a new wandb run
-    wandb.init(entity="LOD_Brain", project="multisite_phase3")         # multisite_phase2    ablation_study    synthseg_trainings
+    ###wandb.init(entity="LOD_Brain", project="multisite_phase3")         # multisite_phase2    ablation_study    synthseg_trainings
     
     # Config is a variable that holds and saves hyperparameters and inputs
-    logger.info(f"Updating confing from argparse: {_args_system}")
+    ###logger.info(f"Updating confing from argparse: {_args_system}")
     config = Config(**_args_system)
-    wandb.run.config.update(config.dict(), allow_val_change=True)
+    ###wandb.run.config.update(config.dict(), allow_val_change=True)
     
-    wandb.run.name = f'{datetime.now().strftime("%m%d.%H%M%S")}_lv{config.network.num_levels}_' \
-                     f'{"c2f_" if config.training.coarse_to_fine else ""}id{wandb.run.id}'
-    wandb.run.save()
-    config.exp_name = wandb.run.name if wandb.run.name else wandb.run.id
+    ###wandb.run.name = f'{datetime.now().strftime("%m%d.%H%M%S")}_lv{config.network.num_levels}_' \
+    ###                f'{"c2f_" if config.training.coarse_to_fine else ""}id{wandb.run.id}'
+    ###wandb.run.save()
+    ###config.exp_name = wandb.run.name if wandb.run.name else wandb.run.id
+
     tf.random.set_seed(config.seed)
     np.random.seed(config.seed)
 
-    config.training.exp_path = Path(wandb.run.dir)
-    with open(config.training.exp_path.parent / 'config.yaml', 'w') as f:
-        yaml.dump(config.dict(), f, sort_keys=False)
+    config.training.exp_path = Path("/home/astroboy/Documents/LOD/log/")###Path(wandb.run.dir)
+    ###with open(config.training.exp_path.parent / 'config.yaml', 'w') as f:
+    ###    yaml.dump(config.dict(), f, sort_keys=False)
     # logger file handler
-    logger.add(opj(config.training.exp_path.as_posix(), config.exp_name + '.log'))
-    logger.info(f"Config: {config}")
+    ###logger.add(opj(config.training.exp_path.as_posix(), config.exp_name + '.log'))
+    ###logger.info(f"Config: {config}")
 
     # Find a GPU available and set others not visible
-    logger.info("\n\n\n******** Run started ********")
-    logger.info('%10s : %s' % ('Running on', os.uname()[1]))
-    logger.info("Command line: " + sys.executable + " " + " ".join(sys.argv))
+    ###logger.info("\n\n\n******** Run started ********")
+    ###logger.info('%10s : %s' % ('Running on', os.uname()[1]))
+    ###logger.info("Command line: " + sys.executable + " " + " ".join(sys.argv))
     #python_utils.findGPUtoUse()
 
     # Retrieve all the volume pathways from the csv and other attributes
-    logger.info("\n\n\n******** Dataset preparation ********")
+    ###logger.info("\n\n\n******** Dataset preparation ********")
     dataset = dataset_manager.prepareDataset(config)
     config.training.train_size = len(dataset['X_train_paths'])
     
@@ -98,29 +99,29 @@ def main():
     ds_train, ds_valid = dataset_manager.TFDatasetGenerator(config, dataset)
 
     # Training
-    logger.info("\n\n\n******** Training ********")
+    ###logger.info("\n\n\n******** Training ********")
 
     if config.network.flat_net:
-        logger.info("Training a flat unet")
+        ###logger.info("Training a flat unet")
         model = train_flat(config, ds_train, ds_valid, dataset['class_weights'])
     elif config.network.vanilla_unet or config.network.cerebrum_net:
-        logger.info("Training a vanilla or CEREBRUM unet")
+        ###logger.info("Training a vanilla or CEREBRUM unet")
         model = train_vanilla_unet(config, ds_train, ds_valid, dataset['class_weights'])
     else:
-        logger.info("Training a pyramid-unet")
+        ###logger.info("Training a pyramid-unet")
         model = train(config, ds_train, ds_valid, dataset['class_weights'])
 
     # Log trained model info
-    out_dir = config.training.exp_path.as_posix()
-    tf.keras.utils.plot_model(model, to_file=opj(out_dir, 'model.png'), show_shapes=True)
-    logger.info(f"Model number of parameters: {model.count_params()}")
-    wandb.log({"model_count_params": model.count_params()})
+    ###out_dir = config.training.exp_path.as_posix()
+    ###tf.keras.utils.plot_model(model, to_file=opj(out_dir, 'model.png'), show_shapes=True)
+    ###logger.info(f"Model number of parameters: {model.count_params()}")
+    ###wandb.log({"model_count_params": model.count_params()})
 
     # Testing
-    logger.info(f"\n\n\n******** Testing ********")
-    test_model(model, ds_valid, dataset, config=config, \
-            path_out_folder=out_dir, \
-            wand=True, save_out_volumes=True)
+    ###logger.info(f"\n\n\n******** Testing ********")
+    ###test_model(model, ds_valid, dataset, config=config, \
+    ###        path_out_folder=out_dir, \
+    ###        wand=True, save_out_volumes=True)
 
 
 if __name__ == '__main__':

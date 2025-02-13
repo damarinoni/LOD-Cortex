@@ -18,7 +18,7 @@ needed for training, valid, and testing:
 from os.path import join as opj
 import os
 import sys
-import wandb
+###import wandb
 import nibabel as nib
 import numpy as np
 from scipy import stats
@@ -167,7 +167,7 @@ def prepareDataset(config: Config):
     experiment_dict['data'].update({'len(X_val_paths)': len(X_valid_paths)})
     experiment_dict['data'].update({'len(X_test_paths)': len(X_test_paths)})
     experiment_dict['data'].update({'class_weights': class_weights})
-    wandb.log(experiment_dict)
+    ###wandb.log(experiment_dict)
 
     logger.info('Volume shapes: ' + str(data_dims))
     logger.info('All volumes number: ' + str(len(Y_train_paths) + len(Y_valid_paths) + len(Y_test_paths)))
@@ -338,15 +338,17 @@ def TFDatasetGenerator(config: Config, dataset: dict):
         ds_train = ds_train.map(map_func=lambda x, y: tf.numpy_function(tf_augment,
                                                                         inp=[x, y],
                                                                         Tout=[tf.float32, tf.uint8]),
-                                num_parallel_calls=tf.data.experimental.AUTOTUNE)
-    ds_train = ds_train.shuffle(25,  # 'len(dataset['X_train_paths'])' takes too much
-                                reshuffle_each_iteration=True)  # Randomly shuffles the elements of this dataset.
+                                num_parallel_calls=1)
+    #ds_train = ds_train.shuffle(25,  # 'len(dataset['X_train_paths'])' takes too much
+    #                            reshuffle_each_iteration=True)  # Randomly shuffles the elements of this dataset.
     ds_train = ds_train.repeat().batch(config.training.batch_size)  # Combines consecutive elements of this dataset into batches.
-    ds_train = ds_train.prefetch(25)  # Creates a Dataset that prefetches elements from this dataset.
-
+    #ds_train = ds_train.prefetch(25)  # Creates a Dataset that prefetches elements from this dataset.
+    ds_train = ds_train.prefetch(tf.data.AUTOTUNE)
     ## Create generator for the validation set   
     ds_valid = createDatasetTF(dataset['X_valid_paths'], dataset['Y_valid_paths'])
     ds_valid = ds_valid.repeat().batch(1)
+    ds_valid = ds_valid.prefetch(tf.data.AUTOTUNE)
+
 
     return ds_train, ds_valid
 

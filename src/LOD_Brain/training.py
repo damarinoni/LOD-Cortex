@@ -296,7 +296,7 @@ def train_model(config: Config, model, ds_train, ds_val, class_weights):
     reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.25, patience=5, min_lr=1e-7, verbose=1)
 
     # Training loop
-    model.fit(ds_train,
+    model.fit_generator(ds_train,
               steps_per_epoch=config.training.train_size // config.training.batch_size,
               epochs=config.training.epochs,
               validation_data=ds_val,

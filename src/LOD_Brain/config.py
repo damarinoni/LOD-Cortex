@@ -111,7 +111,7 @@ class DataConfig(BaseModel):
     Path_in_data: str = Field('/home/astroboy/Documents/LOD/Dataset/', title="root folder")
     Path_in_csv: str = Field('/home/astroboy/Documents/LOD/Dataset/', title="csv path")
     Filename_csv: str = Field('aomic.csv', title="csv filename")
-    Inh_vol_path: str = Field('/LOD_Brain/data/analysis/inhomogeneity_volume/inhomogeneity.npy', title="inhomogeneity path")
+    Inh_vol_path: str = Field('', title="inhomogeneity path")
     normalisation: str = Field('z_score_volume', title="Normalisation procedure, can be: [z_score_volume, z_score_site, rescaling, rescaling_a_b]")
     
     @validator('normalisation')
